@@ -1,17 +1,20 @@
 #README_simulations.txt
+cd /data/tunglab/tpv/LocalAncestry/SELAM_simulated_data/
 
 ###Run SELAM
 #Load in modules and pre-requisites
 module load gcc; module load samtools; module load python/2.7.6-fasrc01; module load virtualenv; module load gsl; 
+# First time we will need to create the virtual environment: virtualenv venv/
 source /data/tunglab/tpv/LocalAncestry/SELAM_simulated_data/venv/bin/activate; pip install --upgrade pip==6.0.7
+# and install SELAM: wget https://github.com/russcd/SELAM/archive/master.zip; unzip master.zip; cd /data/tunglab/tpv/LocalAncestry/SELAM_simulated_data/SELAM-master/src; make
 
 #So let's output 9 chromosomes for each individual. The chromosome lengths correspond to scaffolds in the Wall assembly, such that the lengths of ancestry tracts in the simulated data resemble the expected distribution in real data. 
 /data/tunglab/tpv/LocalAncestry/SELAM_simulated_data/SELAM-master/src/SELAM -d try1_demography.txt -o try1_output.txt --seed 112 -c 9 3 7 7 11 4 10 8 15 12 
 #-c says to call 9 chromosomes, with the lengths given in morgans. so we'll hopefully be getting a lot of recombination events.
+deactivate
 
 ##We must convert  to the ancestry tract lengths we get 
-module load R 
-for f in `cat 00names `; do sed -e s/NAME/$f/g get_tracts.R > s.$f.sh; sbatch s.$f.sh; done
+module load R; for f in `cat 00names `; do sed -e s/NAME/$f/g get_tracts.R > s.$f.sh; sbatch s.$f.sh; done
 ##This script currently codes each 
 
 
