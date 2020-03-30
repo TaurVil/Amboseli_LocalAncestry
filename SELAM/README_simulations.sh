@@ -1,4 +1,5 @@
 #README_simulations.txt
+# SELAM instruction manual: https://github.com/russcd/SELAM/blob/master/SELAM_manual.pdf
 cd /data/tunglab/tpv/LocalAncestry/SELAM_simulated_data/
 
 ###Run SELAM
@@ -13,8 +14,11 @@ source /data/tunglab/tpv/LocalAncestry/SELAM_simulated_data/venv/bin/activate; p
 #-c says to call 9 chromosomes, with the lengths given in morgans. so we'll hopefully be getting a lot of recombination events.
 deactivate
 
-##We must convert  to the ancestry tract lengths we get 
-module load R; for f in `cat 00names `; do sed -e s/NAME/$f/g get_tracts.R > s.$f.sh; sbatch s.$f.sh; done
+ls i*output.txt > 00names 
+sed -i 's/.output.txt//g' 00names
+
+##We must convert ancestry output into tracts for the homozygous individuals
+module load R; for f in `cat 00names `; do sed -e s/NAME/$f/g SELAM_get_tracts.R > s.$f.sh; sbatch s.$f.sh; done
 ##This script currently codes each 
 
 
