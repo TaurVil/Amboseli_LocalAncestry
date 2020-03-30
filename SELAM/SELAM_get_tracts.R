@@ -2,7 +2,7 @@
 #SBATCH --get-user-env
 
 library(data.table); library(plyr)
-fread("NAME.output.txt") -> data
+fread("NAME.output.txt", fill=T) -> data
 read.delim("/data/tunglab/shared/genomes/panubis1/Panubis1.0.fa.fai",header=F) -> lengths
 subset(data, !(data$V1 == "##")) -> d2
 # Column 1: number of generations for the output 
