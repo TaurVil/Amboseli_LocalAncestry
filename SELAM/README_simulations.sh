@@ -12,6 +12,7 @@ source /data/tunglab/tpv/LocalAncestry/SELAM_simulated_data/venv/bin/activate; p
 #So let's output 9 chromosomes for each individual. The chromosome lengths correspond to scaffolds in the Wall assembly, such that the lengths of ancestry tracts in the simulated data resemble the expected distribution in real data. 
 /data/tunglab/tpv/LocalAncestry/SELAM_simulated_data/SELAM-master/src/SELAM -d try1_demography.txt -o try1_output.txt --seed 112 -c 9 3 7 7 11 4 10 8 15 12 
 #-c says to call 9 chromosomes, with the lengths given in morgans. so we'll hopefully be getting a lot of recombination events.
+# The last chromosome is inherited from only the maternal line, hence why it has a weird output. 
 deactivate
 
 ls i*output.txt > 00names 
