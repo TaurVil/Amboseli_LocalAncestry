@@ -4,7 +4,7 @@ Pipelines for calling local ancestry from simulated or resequencing data.
 ### Part 1: Map reads using bowtie2 to the new Wall assembly. 
 
 ##Get SRA files: 
-for f in `cat 00_Wall2016_SRA`; do sed -e s/SRRNUMBER/$f/g ../scripts/download_SRR_SRA_fastq.sh > g.sh; sbatch g.sh; done
+for f in `cat 00_Wall2016_SRA`; do sed -e s/SRRNUMBER/$f/g /data/tunglab/tpv/scripts/download_SRR_SRA_fastq.sh > g.sh; sbatch g.sh; done
 
 sed -e s/SRRNUMBER/SRR2565914/g ../scripts/download_SRR_SRA_fastq.sh > g.sh; sbatch g.sh
 sed -e s/SRRNUMBER/SRR2650000/g ../scripts/download_SRR_SRA_fastq.sh > g.sh; sbatch g.sh
