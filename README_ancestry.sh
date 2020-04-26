@@ -6,20 +6,12 @@ Pipelines for calling local ancestry from simulated or resequencing data.
 ##Get SRA files: 
 for f in `cat 00_Wall2016_SRA`; do sed -e s/SRRNUMBER/$f/g /data/tunglab/tpv/scripts/download_SRR_SRA_fastq.sh > g.sh; sbatch g.sh; done
 
-sed -e s/SRRNUMBER/SRR2565914/g ../scripts/download_SRR_SRA_fastq.sh > g.sh; sbatch g.sh
-sed -e s/SRRNUMBER/SRR2650000/g ../scripts/download_SRR_SRA_fastq.sh > g.sh; sbatch g.sh
-sed -e s/SRRNUMBER/SRR2565912/g ../scripts/download_SRR_SRA_fastq.sh > g.sh; sbatch g.sh
-sed -e s/SRRNUMBER/SRR2650075/g ../scripts/download_SRR_SRA_fastq.sh > g.sh; sbatch g.sh
-
-
 #Map the 290 low coverage sequencing files Arielle produced
 cd /data/tunglab/tpv/LocalAncestry/ ; for f in `cat Amboseli_290/00samples2`; do sed -e s/FILE/$f/g ./run.01.mapBowtie2_wall.FILE.sh > g.sh; sbatch --mem=26000 --nice g.sh; done; rm g.sh
 
 # bowtie2 -p 16 -t -x ./bowtie2_Wall15944/bowtie2_Wall15944 -1 /data/tunglab/asf40/wgs_data/MedGenome_ftp/FASTQs/FILE_R1_*.fastq.gz -2 /data/tunglab/asf40/wgs_data/MedGenome_ftp/FASTQs/FILE_R2_*.fastq.gz -S mapped.FILE.wall.sam --no-unal
 # samtools view -bS mapped.FILE.wall.sam > Amboseli_290/mapped.FILE.wall.bam
 # rm mapped.FILE.wall.sam
-
-
 
 #Saved output files to /data/tunglab/tpv/LocalAncestry/Amboseli_290/output_mapping/
 #Saves mapped bam files to /data/tunglab/tpv/LocalAncestry/Amboseli_290/, under the name of mapped.NAME.wall.bam
