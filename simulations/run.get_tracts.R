@@ -4,7 +4,7 @@
 library(data.table); library(plyr)
 fread("NAME.output.txt", fill=T) -> data
 read.delim("/data/tunglab/shared/genomes/panubis1/Panubis1.0.fa.fai",header=F) -> lengths
-subset(data, !(data$V1 == "##")) -> d2
+
 # Column 1: number of generations for the output 
 # Column 2: 0, sub-population 0
 # Column 3: 1/male; 0/female 
@@ -13,11 +13,12 @@ subset(data, !(data$V1 == "##")) -> d2
 # Column 6: 0/1 (0 is maternal; 1 is paternal)
 # Column 7: 0/1, ancestry type 
 # Column 8/9: position in M 
+
 output <- NULL 
-for (i in unique(d2$V5)) {
+for (i in unique(data$V5)) {
 	print(paste("starting chrom", i))
 	
-	d <- subset(d2, d2$V5 == i)
+	d <- subset(data, data$V5 == i)
 	
 	# Let's clean up the file for that chromosome. 
 	d <- d[order(d$V9,d$V8),]
@@ -38,7 +39,7 @@ for (i in unique(d2$V5)) {
 	
 	#Create and structure output file 
 	res <- as.data.frame(matrix(ncol=2,nrow=nrow(d)))
-	res$chrom <- paste("chr",i,sep=""); res[,2] <- d$V9; res[,1] <- c(0,res[-nrow(res),2]); res$ancestry  <- NA 
+	res$chrom <- lengths[i+17,1]; res[,2] <- d$V9; res[,1] <- c(0,res[-nrow(res),2]); res$ancestry  <- NA 
 	for (j in 1:nrow(d)) {
 		tmp  = subset(d, d$V9 == res$V2[j] |  (d$V9 >= res$V2[j]  & d$V8 < res$V2[j]) ); tmp 
 		# the tract that ends there | (or) the end is later 
@@ -58,7 +59,7 @@ for (i in unique(d2$V5)) {
 	res <- subset(res, res$delete == 0)
 	res$a_next <- c(res$ancestry[-1],-9); print(paste("repetitive calls ", sum(res$ancestry == res$a_next, na.rm=T),sep="_"))
 	print(paste("more than 2 chroms:", sum(!res$rows == 2)))
-	l <- lengths[i+1,2] 
+	l <- lengths[i+17,2] 
 	m <- max(res$V2)
 	res$V1 <- round(res$V1*l/m )
 	res$V2 <- round(res$V2*l/m )
@@ -67,4 +68,4 @@ for (i in unique(d2$V5)) {
 	rbind(output, res) -> output ; rm(res,j, tmp, d )
 }; rm(i) 
 colnames(output)[1:2] <- c('start','end')
-write.table(output[,1:4], "NAME.tracts.txt",row.names=F, col.names=T, sep="\t", quote=F)
+write.table(output[,1:4], "tracts/NAME.tracts.txt",row.names=F, col.names=T, sep="\t", quote=F)
