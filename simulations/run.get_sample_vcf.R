@@ -19,60 +19,47 @@ k=1; unique(c(anu$pos, yel$pos)) -> sites
 
 set.seed(100)
 
-for (j in 1:length(sites)) {
-	#For each site, first get the ancestry status
-	subset(sample, sample$start <= sites[j] & sample$end > sites[j]) -> temp 
-	subset(anu, anu$pos == sites[j] ) -> tanu
-	subset(yel, yel$pos == sites[j]) -> tyel
-	if (nrow(tanu) == 1 & nrow(tyel) == 1) {
-		if (tanu$ref == tyel$ref & tanu$alt == tyel$alt & !(is.na(tyel$ref_freq[1])) & !(is.na(tanu$ref_freq[1])) ) {
-				#Populate the SNP characteristics
-				vcf$CHROM[k] <- tanu$chr[1]
-				vcf$POS[k] <- tanu$pos[1]
-				vcf$REF[k] <- tanu$ref [1]
-				vcf$ALT[k] <- tanu$alt [1]
-
-				if (temp$ancestry[1] == 0) {
-					#make two draws from the yellow baboons
-					if (tyel$ref_freq == 1) { vcf$sampleINDIV[k] <- "0/0"} 
-					if (tyel$alt_freq == 1) {vcf$sampleINDIV[k] <- "1/1"}
-					if (tyel$ref_freq < 1 & tyel$alt_freq < 1) {
-						runif(2,0,1) -> d; sum(d > tyel$ref_freq) -> jk
-						if (jk == 0) {vcf$sampleINDIV[k] <- "0/0"}
-						if (jk == 1) {vcf$sampleINDIV[k] <- "0/1"}
-						if (jk == 2) {vcf$sampleINDIV[k] <- "1/1"}
-					}
-				}
-				if (temp$ancestry[1] == 2) {
-					#make two draws from the anubis baboons
-					if (tanu$ref_freq == 1) { vcf$sampleINDIV[k] <- "0/0"} 
-					if (tanu$alt_freq == 1) {vcf$sampleINDIV[k] <- "1/1"}
-					if (tanu$ref_freq < 1 & tanu$alt_freq < 1) {
-						runif(2,0,1) -> d; sum(d > tanu$ref_freq[1]) -> jk
-						if (jk == 0) {vcf$sampleINDIV[k] <- "0/0"}
-						if (jk == 1) {vcf$sampleINDIV[k] <- "0/1"}
-						if (jk == 2) {vcf$sampleINDIV[k] <- "1/1"}
-					}
-				}
-				if (temp$ancestry[1] == 1) {
-					#make one draw from each species 
-					runif(1,0,1) -> d; sum(d > tanu$ref_freq[1]) -> a
-					runif(1,0,1) -> d; sum(d > tyel$ref_freq[1]) -> y
-					sum(a,y) -> jk 
-						if (jk == 0) {vcf$sampleINDIV[k] <- "0/0"}
-						if (jk == 1) {vcf$sampleINDIV[k] <- "0/1"}
-						if (jk == 2) {vcf$sampleINDIV[k] <- "1/1"}
-					}
-				k <- k+1; print(k)
-		}
-	}
-}
-
+vcf$CHROM <- "SCAF"
+vcf$POS <- sites
+vcf$REF <- anu$ref
+vcf$ALT <- anu$alt
 vcf$INFO <- vcf$ID <- "."
 vcf$QUAL <- 100
 vcf$FILTER <- "QD"
 vcf$FORMAT <- "GT"
 
-write.table(vcf, "simulated_vcfs/NAME.SCAF.vcf", row.names=F, col.names=T, quote=F, sep="\t")
 
+get_gt <- function(site) {
+	ancestry <- subset(sample, sample$start <= site & sample$end > site)$ancestry 
+	anu_freq <- anu[anu$pos == site,]$alt_freq
+	yel_freq <- yel[yel$pos == site,]$alt_freq
+	
+	if (!is.na(anu_freq) & !is.na(yel_freq)) {
+		# make two calls from yellow 
+		if (ancestry == 0) {
+			jk <- sum(runif(2,0,1) > yel_freq)
+		}
+		# make two calls from anubis 
+		if (ancestry == 0) {
+			jk <- sum(runif(2,0,1) > anu_freq)
+		}
+		# make one call from each 
+		if (ancestry == 0) {
+			jk <- sum(runif(1,0,1) > yel_freq, runif(1,0,1) > anu_freq)
+		}
+		
+		if (jk == 0) {genotype <- "0/0"}; 	if (jk == 1) {genotype <- "0/1"}; if (jk == 2) {genotype <- "1/1"}	
+	
+	} else {genotype <- NA}
+	
+	return(genotype)
+}
 
+library(parallel); detectCores() -> cores; c1 <- makeCluster(cores)
+clusterExport(c1, ls())
+vcf[,10] <- do.call("c",parLapply(c1,sites,get_gt))
+colnames(vcf)[10] <- "sampleNAME"
+
+subset(vcf, vcf[,10] == NA) -> vcf
+
+write.table(vcf, "./simulated_vcfs/NAME.SCAF.vcf", row.names=F, col.names=T, quote=F, sep="\t")
