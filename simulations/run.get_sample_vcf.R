@@ -57,7 +57,7 @@ get_gt <- function(site) {
 
 library(parallel)
 #detectCores() -> cores; c1 <- makeCluster(cores); clusterExport(c1, ls()); vcf[,10] <- do.call("c",parLapply(c1,sites,get_gt))
-vcf[,10] <- do.call("c",mclapply(sites,get_gt))
+vcf[,10] <- do.call("c",mclapply(sites,get_gt)) #this is about half the speed of parLapply, but doesn't crash when running jobs on the cluster
 colnames(vcf)[10] <- "sampleNAME"
 
 subset(vcf, !(vcf[,10] == NA)) -> vcf
