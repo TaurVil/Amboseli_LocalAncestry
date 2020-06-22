@@ -60,6 +60,6 @@ library(parallel)
 vcf[,10] <- do.call("c",mclapply(sites,get_gt)) #this is about half the speed of parLapply, but doesn't crash when running jobs on the cluster
 colnames(vcf)[10] <- "sampleNAME"
 
-subset(vcf, !(vcf[,10] == NA)) -> vcf
+subset(vcf, !is.na(vcf[,10])) -> vcf
 
 write.table(vcf, "./simulated_vcfs/NAME.SCAF.vcf", row.names=F, col.names=T, quote=F, sep="\t")
