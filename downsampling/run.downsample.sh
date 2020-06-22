@@ -24,3 +24,5 @@ samtools view -s $perc2 -b /data/tunglab/tpv/mapped_bams/amboseli_hicov/$name*.b
 perc2=`echo $perc/20 | bc -l`
 samtools view -s $perc2 -b /data/tunglab/tpv/mapped_bams/amboseli_hicov/$name*.bam > $name.p5x.bam
 
+
+
