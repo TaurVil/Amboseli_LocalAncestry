@@ -60,6 +60,6 @@ get_gt <- function(site) {
 vcf[,10] <- do.call("c",mclapply(sites,get_gt))
 colnames(vcf)[10] <- "sampleNAME"
 
-subset(vcf, vcf[,10] == NA) -> vcf
+subset(vcf, !(vcf[,10] == NA)) -> vcf
 
 write.table(vcf, "./simulated_vcfs/NAME.SCAF.vcf", row.names=F, col.names=T, quote=F, sep="\t")
