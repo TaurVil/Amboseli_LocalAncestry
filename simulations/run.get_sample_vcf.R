@@ -40,11 +40,11 @@ get_gt <- function(site) {
 			jk <- sum(runif(2,0,1) > yel_freq)
 		}
 		# make two calls from anubis 
-		if (ancestry == 0) {
+		if (ancestry == 2) {
 			jk <- sum(runif(2,0,1) > anu_freq)
 		}
 		# make one call from each 
-		if (ancestry == 0) {
+		if (ancestry == 1) {
 			jk <- sum(runif(1,0,1) > yel_freq, runif(1,0,1) > anu_freq)
 		}
 		
