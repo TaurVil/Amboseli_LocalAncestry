@@ -19,3 +19,7 @@ for file in AMB*.bam; do filename=`echo $file | sed s/.bam//g`; samtools view -H
 ## Call genotypes for each set of bams
 mkdir gVCF; sbatch --array=1-35 --mem=16G  run.gvcf.sh
 sbatch --array=1-7 --mem=16G  run.gvcf_original.sh
+
+## Joint genotype calling for each set of bams 
+sbatch --array=1-6 --mem=16G run.merge_gvcfs.sh
+
