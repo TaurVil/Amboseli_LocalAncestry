@@ -13,7 +13,7 @@ tabix ./filt.$coverage.recode.vcf.gz
 
 module load java/1.8.0_45-fasrc01
 
-java -jar /data/tunglab/tpv/Programs/GenomeAnalysisTK.jar -T CombineVariants -R $path_genome --variant ./filt.$coverage.recode.vcf.gz --variant ../refpanel.vcf.gz -o merged.$coverage.vcf.gz -genotypeMergeOptions UNIQUIFY
+java -jar /data/tunglab/tpv/Programs/GenomeAnalysisTK.jar -T CombineVariants -R $path_genome --variant ./filt.$coverage.recode.vcf.gz --variant ../refpanel.vcf.gz -o merged.$coverage.vcf.gz -genotypeMergeOptions UNIQUIFY -L 01_targetted_chroms.bed
 
 java -jar /data/tunglab/tpv/Programs/GenomeAnalysisTK.jar -T SelectVariants -R $path_genome -V merged.$coverage.vcf.gz -select 'set == "Intersection"' -o CommonCalls.$coverage.vcf
 
