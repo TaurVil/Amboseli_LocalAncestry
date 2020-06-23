@@ -49,6 +49,14 @@ module load samtools; for f in `cat 00chroms`; do samtools faidx /data/tunglab/s
 mkdir sim_reads
 for f in `cat 00names`; do for g in `cat 00chroms`; do sed s/INDIV/$f/g run.get_fasta.sh | sed s/CHROMO/$g/g > g.$f.sh; sbatch g.$f.sh; rm g.$f.sh; done; done
 
+## Combine chromosomes, and map reads using bowtie2
+## Make reduced bowtie2 index to map to
+mkdir mapped_bams; # bowtie2-build Reduced_Genome.fa reduced_genome
+
+sbatch --array=1-25 --mem=8G run.04.map_sim_reads.sh
+
+
+
 
 
 
