@@ -22,4 +22,5 @@ sbatch --array=1-7 --mem=16G  run.gvcf_original.sh
 
 ## Joint genotype calling for each set of bams 
 sbatch --array=1-6 --mem=16G run.merge_gvcfs.sh
-
+## merge with refpanel and get genolik files
+sbatch --array=1-6 --mem=24G run_merge_get_genolik.sh
