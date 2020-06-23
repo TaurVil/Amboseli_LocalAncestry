@@ -6,3 +6,4 @@ for f in `seq 1 20`; do bcftools merge /data/tunglab/tpv/panubis1_genotypes/call
 
 bcftools concat /data/tunglab/tpv/local_ancestry/*.vcf.gz -O z -o /data/tunglab/tpv/local_ancestry/refpanel.vcf.gz
 
+vcftools --gzvcf ../refpanel.vcf.gz --mac 2 --max-missing 0.5 --kept-sites --out ../refpanel
