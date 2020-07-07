@@ -12,3 +12,4 @@
 # Wall: n=15
 # Mikumi: n=14, 10 high coverage new sequencing & 4 low coverage from Wall et al. 2016
 # Baboon Genome Project: n=1 from Mikumi and Rogers et al. 2019
+######## We are not using pcyn_16098, who is the same individual as Mik_007
