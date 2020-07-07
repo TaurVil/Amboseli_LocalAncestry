@@ -1,4 +1,5 @@
 # Merge refpanel of yellow and anubis samples, for all chromosomes. Add 'chr' to chromosome index
+# Starts with filtered data from ./README.sh
 ## Pathways broken, need to rerun
 
 module load bcftools
