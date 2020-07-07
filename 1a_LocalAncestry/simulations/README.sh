@@ -12,7 +12,7 @@ source /data/tunglab/tpv/local_ancestry/simulated_data/venv/bin/activate; pip in
 #So let's output 4 chromosomes for each individual. 
 /data/tunglab/tpv/Programs/SELAM/src/SELAM -d try1_demography.txt -o try1_output.txt --seed 112 -c 5 77 84 63 63 1
 # Demography: a population of 1000 individuals, 70% yellow with 7% and 3% new immigrants per generation
-# Samples: let's output after 20, 50, and 100 generations? 
+# Samples: we'll output 5 individuals at 10, 20, 50, 100, and 150 generations
 #-c says to call 4 chromosomes, with the lengths given in morgans, which correspond to the smallest chromosomes in the baboon genome (17-20).
 # The last chromosome is inherited from only the maternal line, hence why it has a weird output. 
 deactivate
