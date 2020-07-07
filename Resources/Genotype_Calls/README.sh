@@ -17,3 +17,5 @@ bcftools concat /data/tunglab/tpv/panubis1_genotypes/calls_unadmixed/02.yel.*.vc
 module load vcftools
 vcftools --gzvcf ./anubis.vcf.gz --depth --out anubis
 vcftools --gzvcf ./yellow.vcf.gz --depth --out yellow
+
+## for reference allele frequencies, see https://github.com/TaurVil/Amboseli_LocalAncestry/tree/master/Resources/unadmixed_reference_panels
