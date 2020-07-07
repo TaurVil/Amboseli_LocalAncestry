@@ -12,16 +12,6 @@ module load bcftools
 bcftools concat /data/tunglab/tpv/panubis1_genotypes/calls_unadmixed/02.anu.*.vcf.gz -O z -o /data/tunglab/tpv/panubis1_genotypes/anubis.vcf.gz
 bcftools concat /data/tunglab/tpv/panubis1_genotypes/calls_unadmixed/02.yel.*.vcf.gz -O z -o /data/tunglab/tpv/panubis1_genotypes/yellow.vcf.gz
 
-## Estimate relatedness for unadmixed individuals using KING (http://people.virginia.edu/~wc9c/KING/manual.html)
-# convert to plink format
-plink --vcf hicov.amboseli.recode.vcf --maf 0.05 --recode --out plink.ambo 
-
-# Install KING
-##### wget http://people.virginia.edu/~wc9c/KING/Linux-king.tar.gz; tar -xvf Linux-king.tar.gz
-# run KING
-/data/tunglab/tpv/Programs/KING/king
-module load gcc; module load glibc/2.18-gcb01
-
 ## Let's get just a bit of individual and site level information
 
 module load vcftools
