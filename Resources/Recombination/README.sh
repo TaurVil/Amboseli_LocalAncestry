@@ -7,12 +7,17 @@
 #        -Downsampled anubis maps (to match partial yellow maps)
 # Uses genotype calls for anubis and yellow individuals from /Amboseli_LocalAncestry/Resouces/Genotype_Calls
 
-pwd /data/tunglab/tpv/panubis1_genotypes/recombination
+cd /data/tunglab/tpv/panubis1_genotypes/recombination
 
-## Filter genotypes
+## Starting with the high coverage samples (in /data/tunglab/tpv/panubis1_genotypes/high_coverage and on github Amboseli_LocalAncestry/Resources/High Coverage Samples/)
+module load bcftools; bcftools concat /data/tunglab/tpv/panubis1_genotypes/high_coverage/02.unadmixed_highcov.*.vcf.gz -O z -o ./unadmixed_highcov.vcf.gz
+
+## Recombination map-specific genotype filtering for each dataset
 # Filtering instructions from Pfeifer 2020 (vervet monkey genetic map)
-## Remove clusters of SNPs within a 10bp window (GATK clusterSize=3, clusterWindowSize=10) 
 
+
+
+## Remove clusters of SNPs within a 10bp window (GATK clusterSize=3, clusterWindowSize=10) and singletons within the target population
 module load java/1.8.0_45-fasrc01; module load tabix
 tabix ../anubis.vcf.gz
 java -jar /data/tunglab/tpv/Programs/GenomeAnalysisTK.jar -T VariantFiltration -R ../Panubis1.nochromname.fa -V ../anubis.vcf.gz --cluster-size 3 --cluster-window-size 10 -o ./anubis_cluster.vcf.gz
