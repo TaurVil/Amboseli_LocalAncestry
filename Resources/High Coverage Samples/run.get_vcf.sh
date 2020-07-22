@@ -9,10 +9,10 @@ module load java/1.8.0_45-fasrc01; module load tabix
 module load samtools; module load vcftools
 
 # Get genotype calls for the high coverage samples, putatively unadmixed, samples.
-#vcftools --gzvcf /data/tunglab/asf40/wgs_data/from_Jacqueline/baboon1k_v1_snpEff_chr$chrom'.vcf.gz' --keep 10.hicov.txt --max-alleles 2 --remove-indels --recode --out ./01.$chrom.unadmixed --recode-INFO-all
+vcftools --gzvcf /data/tunglab/asf40/wgs_data/from_Jacqueline/baboon1k_v1_snpEff_chr$chrom'.vcf.gz' --keep 10.hicov.txt --max-alleles 2 --remove-indels --recode --out ./01.$chrom.unadmixed --recode-INFO-all
 
 # vcftools filtering pass 1
-#vcftools --gzvcf ./01.$chrom.unadmixed.recode.vcf --max-missing 1 --minQ 30 --max-alleles 2 --remove-indels --maf 0.001 --recode --out ./01b.$chrom.unadmixed --recode-INFO-all
+vcftools --gzvcf ./01.$chrom.unadmixed.recode.vcf --max-missing 1 --minQ 30 --max-alleles 2 --remove-indels --maf 0.001 --recode --out ./01b.$chrom.unadmixed --recode-INFO-all
 
 
 gunzip ./01b.$chrom.unadmixed.recode.vcf
