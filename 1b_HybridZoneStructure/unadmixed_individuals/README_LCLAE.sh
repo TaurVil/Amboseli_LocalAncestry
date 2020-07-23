@@ -1,10 +1,13 @@
 ## Can we detect introgression in our reference panel samples? 
 
-# Get genotype likelihoods for unadmixed individuals
-## The chromosome level vcfs are housed in /data/tunglab/tpv/local_ancestry/
-cd /data/tunglab/tpv/local_ancestry/; module load vcftools; vcftools --gzvcf 20.vcf.gz --012 --out refpanel
+cd /data/tunglab/tpv/local_ancestry/unadmixed_individuals
 
-mkdir unadmixed_individuals; cd unadmixed_individuals
+# Get genotype likelihoods for unadmixed individuals
+module load bcftools
+for index in `seq 1 20`; do bcftools merge /data/tunglab/tpv/panubis1_genotypes/chrom_vcfs/02.anu.$index.recode.vcf.gz /data/tunglab/tpv/panubis1_genotypes/chrom_vcfs/02.yel.$index.recode.vcf.gz -O z -o $index.vcf.gz; echo $index; done
+
+vcftools --gzvcf 20.vcf.gz --012 --out refpanel
+
 sbatch --array=1-20 --mem=5G run.get_genolik.sh
 
 ## 41 anubis 1-41
@@ -14,13 +17,13 @@ sbatch --array=1-20 --mem=5G run.get_genolik.sh
 
 mkdir raw_calls
 echo 41 `seq 1 41` > 02.anubis.h; echo 22 `seq 42 63` > 02.yellow.h
-echo 21 `seq 42 63` > 02.yellow_minus1.h
+echo 21 `seq 42 63` > 02.yellow_minus1.h; echo 40 `seq 1 41` > 02.anubis_minus1.h
 
-sbatch --array=44-62 run.get_raw_calls.sh
+sbatch --array=42-62 run.get_raw_calls.sh
 
-## 63 is special and needs to be done manually
+## 63 is special and the *.h file needs to be done manually
 f=63
-for chrom in `seq 11 15 `; do touch ./raw_calls/full_refpanel.35kb.p2.$f.$chrom.txt; l=`wc -l raw_calls/full_refpanel.35kb.p2.$f.$chrom.txt | cut -f 2 | sed 's/ .*//g'`; if (($l==0)); then echo "STARTING"; cat genolik.$chrom.genolik | /data/tunglab/tpv/Programs/LCLAE/filtbaboon2c 64 02.anubis.h $f.h $f | /data/tunglab/tpv/Programs/LCLAE/geno_lik2 .2 35000 > ./raw_calls/full_refpanel.35kb.p2.$f.$chrom.txt; fi ; echo $chrom; done
+for chrom in `seq 1 20 `; do touch ./raw_calls/full_refpanel.35kb.p2.$f.$chrom.txt; l=`wc -l raw_calls/full_refpanel.35kb.p2.$f.$chrom.txt | cut -f 2 | sed 's/ .*//g'`; if (($l==0)); then echo "STARTING"; cat genolik.$chrom.genolik | /data/tunglab/tpv/Programs/LCLAE/filtbaboon2c 63 02.anubis.h $f.h $f | /data/tunglab/tpv/Programs/LCLAE/geno_lik2 .2 35000 > ./raw_calls/full_refpanel.35kb.p2.$f.$chrom.txt; fi ; echo $chrom; done
 
 ## Add chrom and merge
 for id in `seq 42 63`; do name=`head -$id ../refpanel.012.indv | tail -1`; for chrom in `seq 1 20`; do sed -i 's/^/\t/' ./raw_calls/full_refpanel.35kb.p2.$id.$chrom.txt; sed -i s/^/$chrom/ ./raw_calls/full_refpanel.35kb.p2.$id.$chrom.txt; done; cat ./raw_calls/full_refpanel.35kb.p2.$id.* > ./raw_calls/yellow.full_refpanel.35kb.p2.$name.$cov.txt; done
