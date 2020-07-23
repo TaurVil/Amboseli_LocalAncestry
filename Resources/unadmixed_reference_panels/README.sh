@@ -7,7 +7,7 @@
 # Wall, Tulane NPRC: n=6 from Wall et al. 2016
 # Baboon Genome Project: n=4 from Rogers et al. 2019
 
-## Yellow: n=23
+## Yellow: n=22
 # SW: n=7 from SW NPRC founder individuals in Robinson et al. 2019. 
 # Wall: n=15
 # Mikumi: n=14, 10 high coverage new sequencing & 4 low coverage from Wall et al. 2016
