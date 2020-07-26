@@ -33,5 +33,5 @@ for chrom in `seq 1 20 `; do touch ./raw_calls/full_refpanel.35kb.p2.$f.$chrom.t
 for id in `seq 1 63`; do name=`head -$id ./refpanel.012.indv | tail -1`; for chrom in `seq 1 20`; do sed -i 's/^/\t/' ./raw_calls/full_refpanel.35kb.p2.$id.$chrom.txt; sed -i s/^/$chrom/ ./raw_calls/full_refpanel.35kb.p2.$id.$chrom.txt; done; cat ./raw_calls/full_refpanel.35kb.p2.$id.* > ./raw_calls/refpanel.full_refpanel.35kb.p2.$name.$cov.txt; done
 
 mkdir tracts
-module load R; for id in `seq 42 63`; do name=`head -$id ../refpanel.012.indv | tail -1`; sed -e s/INDIV/$name/g run.get_tracts.R > r.$id.R; sbatch r.$id.R; rm r.$id.R; done
+module load R; for id in `seq 1 63`; do name=`head -$id ./refpanel.012.indv | tail -1`; sed -e s/INDIV/$name/g run.get_tracts.R > r.$id.R; sbatch r.$id.R; rm r.$id.R; done
 
