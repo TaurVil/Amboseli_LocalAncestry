@@ -23,10 +23,15 @@ sbatch --array=1-7 --mem=16G  run.03.gvcf_original.sh
 
 ## Joint genotype calling for each set of bams 
 sbatch --array=1-6 --mem=16G run.04.merge_gvcfs.sh
+
+# For the refpanel, get the list of kept sites, and adjust to use the 'chr' nomenclature
+## in /data/tunglab/tpv/local_ancestry/unadmixed_individuals/refpanel.kept.sites
+https://github.com/TaurVil/Amboseli_LocalAncestry/blob/master/Resources/Genotype_Calls/make_merged_refpanel.sh 
+
 ## merge with refpanel and get genolik files
 sbatch --array=1-6 --mem=24G run.05.merge_get_genolik.sh
 
-## use vcftools to get the depth (idepth), relatedness, and individual names from one of hte CommonCalls vcfs. These aren't necessary for anything, but help figure out which individuals are what for the *.h files
+## use vcftools to get the depth (idepth), relatedness, and individual names from one of the CommonCalls vcfs. These aren't necessary for anything, but help figure out which individuals are what for the *.h files
 
 ## 32 to 38 are the amboseli samples
 ## SW are up to 31, mixed between yellow (n=7) and anubis (n=24)
@@ -34,7 +39,7 @@ sbatch --array=1-6 --mem=24G run.05.merge_get_genolik.sh
 ## 15 Mikumi: 46 to 59
 ## 6 Tulane: 60 to 65
 ## 4 BGP anubis: 66 to 69
-## 1 BGP yellow: 70 (71 is a copy of Mikumi 7)
+## 1 BGP yellow: 70
 
 ## Get LCLAE calls
 mkdir raw_calls
