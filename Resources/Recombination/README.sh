@@ -15,20 +15,17 @@ module load bcftools; bcftools concat /data/tunglab/tpv/panubis1_genotypes/high_
 ## Recombination map-specific genotype filtering for each dataset
 # Filtering instructions from Pfeifer 2020 (vervet monkey genetic map)
 
-
-
+## anubisSW
+# Excluded sites with missing data to avoid errors and biases resulting from computational imputation
+module load vcftools; vcftools --gzvcf unadmixed_highcov.vcf.gz --keep ../00_anu_SW.list --max-missing 1 --max-alleles 2 --recode --recode-INFO-all --out anubisSW --maf 0.05
 ## Remove clusters of SNPs within a 10bp window (GATK clusterSize=3, clusterWindowSize=10) and singletons within the target population
-module load java/1.8.0_45-fasrc01; module load tabix
-tabix ../anubis.vcf.gz
-java -jar /data/tunglab/tpv/Programs/GenomeAnalysisTK.jar -T VariantFiltration -R ../Panubis1.nochromname.fa -V ../anubis.vcf.gz --cluster-size 3 --cluster-window-size 10 -o ./anubis_cluster.vcf.gz
-
-
-
-# Excluded sites with missing data (n=XX, XX%) to avoid errors and biases resulting from computational imputation
+module load tabix; bgzip anubisSW.recode.vcf; module load java/1.8.0_45-fasrc01; module load tabix; tabix ./anubisSW.recode.vcf.gz
+java -jar /data/tunglab/tpv/Programs/GenomeAnalysisTK.jar -T VariantFiltration -R ../Panubis1.nochromname.fa -V ./anubisSW.recode.vcf.gz -cluster 3 -window 10 -o ./anubisSW_cluster.vcf.gz
 # Stringent filtering for false variants
 ## SNPs showing an excess of heterozygosity were removed. Specifically, a P-value for Hardy–Weinberg Equilibrium was calculated using the “—hardy” option in VCFtools v.0.1.13 (Danecek et al. 2011), and SNPs with P < 0.01 removed.
+module load vcftools; vcftools --hardy --gzvcf anubisSW_cluster.vcf.gz --out anubisSW
 
-## SNPs that could be recipricolly lifted over with the human genome?
+## SNPs that could be recipricolly lifted over with the human genome? We'll ignore this, assuming the quality of the baboon genome is sufficient. 
 
 # Remove fixed alleles
 
