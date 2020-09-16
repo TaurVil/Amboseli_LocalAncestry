@@ -31,8 +31,20 @@ mkdir amboseli_homozygous_segments; cd amboseli_homozygous_segments/
 ## Get bed file per individual of sites to maintain, and list of individuals for recent and historic
 for f in `cat ../../local_ancestry/recent_hybrids.txt ../../local_ancestry/historical_hybrids.txt`; do grep $f ../../local_ancestry/amboseli_tracts_unmasked.txt > $f.homozygous.bed; done
 ## Remove half base pairs from the bed files
-for f in `ls *bed`; do cat $f | cut -f 1-3 | sed 's/\.5//g' > tmp; mv tmp $f; done
-for f in `ls *bed`; do cat bed_head $f > tmp; mv tmp $f; done
+for f in `ls *bed`; do cat $f | cut -f 1-3 | sed 's/\.5//g' | sed 's/chr//g' > tmp; mv tmp $f; done
+for f in `ls *bed`; do cat bed_head $f > tmp; mv tmp indiv_beds/$f; rm $f; done
 
-for f in `cat ../../local_ancestry/recent_hybrids.txt ../../local_ancestry/historical_hybrids.txt | sed 's/\r//g' `; do sed -e s/SAMPLE_NAME/$f/g run.01.get_indiv_vcf.sh > r.$f.sh; sbatch --mem=4G --nice r.$f.sh; echo $f; rm r.$f.sh; done
 mkdir indiv_vcfs
+for f in `cat ../../local_ancestry/recent_hybrids.txt ../../local_ancestry/historical_hybrids.txt | sed 's/\r//g' `; do sed -e s/SAMPLE_NAME/$f/g run.01.get_indiv_vcf.sh > r.$f.sh; sbatch --mem=4G --nice r.$f.sh; echo $f; rm r.$f.sh; done
+
+
+## Reform those individual files back into a full vcf, then filter for at least 10 individuals per call set
+mkdir indiv_vcfs/recent; mkdir indiv_vcfs/historic
+for f in `cat ../../local_ancestry/recent_hybrids.txt`; do mv indiv_vcfs/subvcf.$f* indiv_vcfs/recent; done
+for f in `cat ../../local_ancestry/historical_hybrids.txt`; do mv indiv_vcfs/subvcf.$f* indiv_vcfs/historic; done
+
+module load tabix; module load samtools; module load vcftools; module load bcftools
+bcftools merge indiv_vcfs/recent/subvcf.*.recode.vcf.gz -O z -o ./recent_unfiltered.vcf.gz
+
+mkdir refpanel_vcfs; for vers in `cat 00_versions.list`; do sed -e s/VERSION_NAME/$vers/g run.02.merge_filter_vcfs.sh > r.$vers.sh; sbatch --mem=8G r.$vers.sh; rm r.$vers.sh; done 
+
