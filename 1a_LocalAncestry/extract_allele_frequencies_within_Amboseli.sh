@@ -43,9 +43,7 @@ mkdir indiv_vcfs/recent; mkdir indiv_vcfs/historic
 for f in `cat ../../local_ancestry/recent_hybrids.txt`; do mv indiv_vcfs/subvcf.$f*gz* indiv_vcfs/recent; done
 for f in `cat ../../local_ancestry/historical_hybrids.txt`; do mv indiv_vcfs/subvcf.$f*gz* indiv_vcfs/historic; done
 
-module load tabix; module load samtools; module load vcftools; module load bcftools
-bcftools merge indiv_vcfs/historic/subvcf.*.recode.vcf.gz -O z -o ./historic_unfiltered.vcf.gz
-bcftools merge indiv_vcfs/recent/subvcf.*.recode.vcf.gz -O z -o ./recent_unfiltered.vcf.gz
+sbatch --mem=24G run.02a.get_recent.sh
+sbatch --mem=24G run.02b.get_historic.sh
 
-mkdir refpanel_vcfs; for vers in `cat 00_versions.list`; do sed -e s/VERSION_NAME/$vers/g run.02.merge_filter_vcfs.sh > r.$vers.sh; sbatch --mem=8G r.$vers.sh; rm r.$vers.sh; done 
 
