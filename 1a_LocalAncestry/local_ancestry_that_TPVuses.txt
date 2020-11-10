@@ -1,0 +1,1 @@
+maskedSW: /data/tunglab/asf40/wgs_data/MedGenome_ftp/local_ancestry_finalizedgenos/ancestry_usingmaskedSWref/amboseli_indiv/amb.tracts.maskedSWref.txt
