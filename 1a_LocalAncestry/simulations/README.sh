@@ -3,6 +3,9 @@
 cd /data/tunglab/tpv/local_ancestry/simulated_data/
 
 ###Run SELAM
+# must have output file in increasing generations
+# must not have existing output files (will append to rather than overwrite)
+
 #Load in modules and pre-requisites
 module load gcc; module load samtools; module load python/2.7.6-fasrc01; module load virtualenv; module load gsl; 
 # First time we will need to create the virtual environment: virtualenv venv/
@@ -10,9 +13,9 @@ source /data/tunglab/tpv/local_ancestry/simulated_data/venv/bin/activate; pip in
 # and install SELAM: wget https://github.com/russcd/SELAM/archive/master.zip; unzip master.zip; cd /data/tunglab/tpv/LocalAncestry/SELAM_simulated_data/SELAM-master/src; make
 
 #So let's output 4 chromosomes for each individual. 
-/data/tunglab/tpv/Programs/SELAM/src/SELAM -d try1_demography.txt -o try1_output.txt --seed 112 -c 5 77 84 63 63 1
+/data/tunglab/tpv/Programs/SELAM/src/SELAM -d try1_demography.txt -o try1_output.txt --seed 42 -c 5 77 84 63 63 1
 # Demography: a population of 1000 individuals, 70% yellow with 7% and 3% new immigrants per generation
-# Samples: we'll output 5 individuals at 10, 20, 50, 100, and 150 generations
+# Samples: we'll output 5 individuals at 10, 20, 50, 100, and 150 generations ## updated now to output 10, 20, 5, 7, and 15 generations. Even 10 generations seems long for the mean Amboseli tract lengths (at least for the high coverage samples I compared them to)
 #-c says to call 4 chromosomes, with the lengths given in morgans, which correspond to the smallest chromosomes in the baboon genome (17-20).
 # The last chromosome is inherited from only the maternal line, hence why it has a weird output. 
 deactivate
@@ -25,6 +28,8 @@ for f in `ls i*output.txt`; do grep -v '^#' $f | grep -v -P "\t4\t" > tmp; mv tm
 ##We must convert ancestry output into tracts for the homozygous individuals
 mkdir tracts; module load R; for f in `cat 00names `; do sed -e s/NAME/$f/g run.get_tracts.R > s.$f.sh; sbatch s.$f.sh; rm s.$f.sh; done
 ## There are checks in place to make sure each call is biallelic and length > 0
+## Cleanup
+mv i*.txt tracts/; mv slurm-* tracts/
 
 ##Generate a vcf file for each sample
 # creat example header to use
@@ -37,6 +42,7 @@ mv chr*frq /data/tunglab/tpv/local_ancestry/simulated_data/; cd /data/tunglab/tp
 
 # get a simplified vcf file for each sample
 mkdir simulated_vcfs; module load R; for f in `cat 00names`; do for g in `cat 00chroms`; do cat run.get_sample_vcf.R | sed -e s/NAME/$f/g | sed -e s/SCAF/$g/g > g.$f.$g.R; sbatch g.$f.$g.R; rm g.$f.$g.R; done; done 
+rm slurm*
 
 # We need to add the full vcf header to each sample, which we'll do with this and within the for loop below 
 zcat /data/tunglab/tpv/panubis1_genotypes/calls_merged/04.merged_shared.1.vcf.gz | grep '^#' | sed '$ d' > full_header.vcf
