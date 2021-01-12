@@ -64,6 +64,7 @@ mkdir mapped_bams; # bowtie2-build Reduced_Genome.fa reduced_genome
 sbatch --array=1-25 --mem=8G run.04.map_sim_reads.sh
 
 
+sbatch --array=1-25 --mem=6G run.downsample.sh
 
 
 
