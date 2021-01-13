@@ -60,12 +60,16 @@ for f in `cat 00names`; do for g in `cat 00chroms`; do sed s/INDIV/$f/g run.get_
 ## Combine chromosomes, and map reads using bowtie2
 ## Make reduced bowtie2 index to map to
 mkdir mapped_bams; # bowtie2-build Reduced_Genome.fa reduced_genome
-
 sbatch --array=1-25 --mem=8G run.04.map_sim_reads.sh
 
-
+## Downsample each sample to 2x and 1x (as well as the 10x we generated)
 sbatch --array=1-25 --mem=6G run.downsample.sh
 
+## Call genotypes for each set of bams
+cd mapped_bams/; ls i*bam | sed 's/.bam//g' > ../00_bams.txt; cd ..
+mkdir gVCF; sbatch --array=1-75 --mem=16G  run.03.gvcf.sh
 
-
+## Joint genotype calling for each set of bams 
+sbatch --array=1-3 --mem=16G run.04.merge_gvcfs.sh
+## Clean out all pre-requisite files up to this point. 
 
