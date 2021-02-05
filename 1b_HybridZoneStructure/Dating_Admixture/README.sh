@@ -12,16 +12,21 @@ module load glibc/2.14-gcb01
 module load gnuplot 
 
 
-## We'll grab genotype calls from: 
-# high coverage anubis and yellow samples (Robinson 2019): /data/tunglab/tpv/refpanel_panubis1/panubis1_n33_9yel_24anu.vcf.gz 
-# Wall 2016 refpanel: /data/tunglab/tpv/refpanel_panubis1/refpanel_all.vcf.gz
+## We'll grab Amboseli genotype calls from: /data/tunglab/tpv/panubis1_genotypes/calls_merged/merged_shared.allchroms.vcf.gz
+## Masked refpanel genotype calls from: /data/tunglab/tpv/panubis1_genotypes/masked_final/masked.filtered.no_chr.yes_intersect_50.vcf.gz
+# High coverage yellow baboons list: 00_amboseli.list
+# High coverage refpanel samples: 00_yel.list and 00_anu.list
+
+cd /data/tunglab/tpv/local_ancestry/DATES
 # Extract high coverage amboseli individuals
-vcftools --gzvcf ../all_amboseli_gt.vcf.gz --indv HAP --indv LIT --indv 7921222 --indv 7921259 --indv 7921231 --indv 7921223 --indv 7921207 --indv 7921234 --indv 7921213 --indv 7921248 --chr chr1 --chr chr2 --chr chr3 --chr chr4 --chr chr5 --chr chr6 --chr chr7 --chr chr8 --chr chr9 --chr chr10 --chr chr11 --chr chr12 --chr chr13 --chr chr14 --chr chr15 --chr chr16 --chr chr17 --chr chr18 --chr chr19 --chr chr20 --recode --out hicov.amboseli
+module load vcftools; module load plink
+vcftools --gzvcf /data/tunglab/tpv/panubis1_genotypes/calls_merged/merged_shared.allchroms.vcf.gz --keep 00_amboseli.list --maf 0.01 --max-alleles 2 --recode --out hicov.amboseli
 plink --vcf hicov.amboseli.recode.vcf --maf 0.05 --recode --out plink.ambo 
 /data/tunglab/tpv/Programs/EIG-6.1.4/bin/convertf -p par.PED.ANCESTRYMAP2
 ## Manually edit the population column 
 
-vcftools --gzvcf /data/tunglab/tpv/refpanel_panubis1/panubis1_n33_9yel_24anu.vcf.gz --chr chr1 --chr chr2 --chr chr3 --chr chr4 --chr chr5 --chr chr6 --chr chr7 --chr chr8 --chr chr9 --chr chr10 --chr chr11 --chr chr12 --chr chr13 --chr chr14 --chr chr15 --chr chr16 --chr chr17 --chr chr18 --chr chr19 --chr chr20 --recode --out hicov.ref 
+# Extract high coverage, masked refpanel samples 
+vcftools --gzvcf /data/tunglab/tpv/panubis1_genotypes/masked_final/masked.filtered.no_chr.yes_intersect_50.vcf.gz --keep 00_anu.list --keep 00_yel.list --recode --out hicov.ref
 plink --vcf hicov.ref.recode.vcf --maf 0.05 --recode --out plink.n33
 /data/tunglab/tpv/Programs/EIG-6.1.4/bin/convertf -p par.PED.ANCESTRYMAP
 ## Manually edit the population column for yellow vs anubis 
