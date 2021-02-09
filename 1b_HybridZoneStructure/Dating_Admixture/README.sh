@@ -1,17 +1,6 @@
 # Approximate the timing of admixture using DATES (from Priya Moorjani)
 ## Genotype and recombination files need to be updated to the most recent genome version
 
-# Run DATES 
-## Load relevant packages
-LD_LIBRARY_PATH=/data/tunglab/tpv/Programs/gsl-2.3/lib:/data/tunglab/tpv/Programs/fftw-3.3.3/lib
-export LD_LIBRARY_PATH
-export PATH=$PATH:$LD_LIBRARY_PATH
-export PATH=$PATH:/data/tunglab/tpv/dating_admixture/DATES-master/src/bin
-module load OpenBLAS/0.2.20-gcb01
-module load glibc/2.14-gcb01
-module load gnuplot 
-
-
 ## We'll grab Amboseli genotype calls from: /data/tunglab/tpv/panubis1_genotypes/calls_merged/merged_shared.allchroms.vcf.gz
 ## Masked refpanel genotype calls from: /data/tunglab/tpv/panubis1_genotypes/masked_final/masked.filtered.no_chr.yes_intersect_50.vcf.gz
 # High coverage yellow baboons list: 00_amboseli.list
@@ -45,7 +34,7 @@ plink --vcf tmp.ref.for_plink.recode.vcf --snps-only --maf 0.05 --recode --out p
 module load R; R
 library(data.table); fread("ambo.snp") -> snp
 #dim(snp); subset(snp, snp$V4 >= min(rcr$`#`) & snp$V4 <= max(rcr$left_snp)) -> snp ; dim(snp) #clear out SNPs beyond RCR rate
-s2 <- as.data.frame(cbind(paste("snp", snp$V4,sep=""), snp$V2))
+s2 <- as.data.frame(cbind(paste("snp", snp$V4,".", snp$V2, snp$V5, snp$V6,sep=""), snp$V2))
 colnames(s2)[1:2] <- c("snpid","chr")
 s2$GP <- NA
 s2$PP <- snp$V4
@@ -64,14 +53,14 @@ for (i in unique(snp$V2)) {
 	tmp$GP <- predict(lo, tmp$PP)
 	tmp$GP[tmp$PP < 75000] <- predict(lo,75000)*tmp$PP[tmp$PP < 75000]/ 75000
 	tmp <- tmp[!is.na(tmp$GP),]
-	rbind(s3,tmp) -> s3
+	rbind(s3,tmp) -> s3; print(i)
 }
 #s2$GP <- s2$PP/1e6
 write.table(s3, "ambo.v2.snp", row.names=F, col.names=F, sep="\t", quote=F)
 
 
 library(data.table); fread("n46.snp") -> snp
-s2 <- as.data.frame(cbind(paste("snp", snp$V4,sep=""), snp$V2))
+s2 <- as.data.frame(cbind(paste("snp", snp$V4,".", snp$V2, snp$V5, snp$V6,sep=""), snp$V2))
 colnames(s2)[1:2] <- c("snpid","chr")
 s2$GP <- NA
 s2$PP <- snp$V4
@@ -98,7 +87,7 @@ write.table(s3, "n46.v2.snp", row.names=F, col.names=F, sep="\t", quote=F)
 
 
 ## Merge ANCESTRYMAP files 
-/data/tunglab/tpv/dating_admixture/DATES-master/example/mergeit -p par.mergeit > mergeit.log 
+/data/tunglab/tpv/Programs/DATES-master/example/mergeit -p par.mergeit > mergeit.log 
 
 ## So there was an ordering issue with the imputation? 
 library(data.table); fread("family_packed.snp") -> snp
@@ -123,7 +112,17 @@ for (i in unique(snp$V2)) {
 /data/tunglab/tpv/Programs/EIG-6.1.4/bin/convertf -p par.convertf.order
 
 
-## Run Dates 
-/data/tunglab/tpv/dating_admixture/DATES-master/src/bin/dates -p par.dates > log.dates 
+# Run DATES 
+cd /data/tunglab/tpv/local_ancestry/DATES/
+## Load relevant packages
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/tunglab/tpv/Programs/gsl-2.3/lib:/data/tunglab/tpv/Programs/fftw-3.3.3/lib
+export LD_LIBRARY_PATH
+export PATH=$PATH:$LD_LIBRARY_PATH
+export PATH=$PATH:/data/tunglab/tpv/Programs/DATES-master/src/bin/
+module load OpenBLAS/0.2.20-gcb01
+module load glibc/2.14-gcb01
+module load gnuplot 
+
+/data/tunglab/tpv/Programs/DATES-master/src/bin/dates -p par.dates > log.dates 
 
 
