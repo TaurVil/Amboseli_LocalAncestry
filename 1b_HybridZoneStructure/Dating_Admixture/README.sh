@@ -21,80 +21,80 @@ cd /data/tunglab/tpv/local_ancestry/DATES
 # Extract high coverage amboseli individuals
 module load vcftools; module load plink
 vcftools --gzvcf /data/tunglab/tpv/panubis1_genotypes/calls_merged/merged_shared.allchroms.vcf.gz --keep 00_amboseli.list --maf 0.01 --max-alleles 2 --recode --out hicov.amboseli
-plink --vcf hicov.amboseli.recode.vcf --maf 0.05 --recode --out plink.ambo 
+vcf-sort hicov.amboseli.recode.vcf > tmp.ambo.recode.vcf
+## Manually remove underscores in sample names
+# get rid of single nucleotide deletions, then convert to ancestrymap format
+grep -v '^#' tmp.ambo.recode.vcf | cut -f 1-8 > tmp.ambo.snps; grep '\*' tmp.ambo.snps | cut -f 1-2 > tmp.ambo.to_exclude.list
+vcftools --exclude-positions-overlap tmp.ambo.to_exclude.list --vcf tmp.ambo.recode.vcf --recode --out tmp.ambo.for_plink
+plink --vcf tmp.ambo.for_plink.recode.vcf --snps-only --maf 0.05 --recode --out plink.ambo 
 /data/tunglab/tpv/Programs/EIG-6.1.4/bin/convertf -p par.PED.ANCESTRYMAP2
-## Manually edit the population column 
+## Manually edit the population column : ambo.v2.ind
 
 # Extract high coverage, masked refpanel samples 
 vcftools --gzvcf /data/tunglab/tpv/panubis1_genotypes/masked_final/masked.filtered.no_chr.yes_intersect_50.vcf.gz --keep 00_anu.list --keep 00_yel.list --recode --out hicov.ref
-plink --vcf hicov.ref.recode.vcf --maf 0.05 --recode --out plink.n33
+vcf-sort hicov.ref.recode.vcf > tmp.hicov.recode.vcf
+## Manually remove underscores in sample names
+# get rid of single nucleotide deletions, then convert to ancestrymap format
+grep -v '^#' tmp.hicov.recode.vcf | cut -f 1-8 > tmp.hicov.snps; grep '\*' tmp.hicov.snps | cut -f 1-2 > tmp.ref.to_exclude.list
+vcftools --exclude-positions-overlap tmp.ref.to_exclude.list --vcf tmp.hicov.recode.vcf --recode --out tmp.ref.for_plink
+plink --vcf tmp.ref.for_plink.recode.vcf --snps-only --maf 0.05 --recode --out plink.n46 
 /data/tunglab/tpv/Programs/EIG-6.1.4/bin/convertf -p par.PED.ANCESTRYMAP
-## Manually edit the population column for yellow vs anubis 
+## Manually edit the population column for yellow vs anubis : n46.v2.ind
 
 ## Reformat snp file, adding positions 
-/data/tunglab/tpv/SW_anubis_founders/n24_anubis_output
-
-
+module load R; R
 library(data.table); fread("ambo.snp") -> snp
 #dim(snp); subset(snp, snp$V4 >= min(rcr$`#`) & snp$V4 <= max(rcr$left_snp)) -> snp ; dim(snp) #clear out SNPs beyond RCR rate
 s2 <- as.data.frame(cbind(paste("snp", snp$V4,sep=""), snp$V2))
 colnames(s2)[1:2] <- c("snpid","chr")
 s2$GP <- NA
 s2$PP <- snp$V4
-load("~/n10_recombination_rates.RData")
-subset(res, res$n24_anubis < 100*median(res$n24_anubis)) -> res2
+load("/data/tunglab/tpv/Windows_25kb_recombination.RData")
+subset(rcr, rcr$n24_anubis < 100*median(rcr$n24_anubis)) -> res2
 s3 <- NULL 
 for (i in unique(snp$V2)) {
 	tmp=subset(s2, s2$chr == i) 
 	r1=subset(res2, res2$chr == paste("chr",i,sep=""))
 	r1$sum <- cumsum(r1$n24_anubis)
-	
-	if (i == 1) {d <- 280}; if (i == 2) {d <- 264}; if (i == 3) {d <- 220}; if (i == 4) {d <- 210}; if (i ==5) {d <- 200}
-	if (i == 6) {d <- 190}; if (i == 7) {d <- 185}; if (i == 8) {d <- 170}; if (i == 9) {d <- 165}; if (i ==10) {d <- 175}
-	if (i == 11) {d <- 160}; if (i == 12) {d <- 175}; if (i == 13) {d <- 130}; if (i == 14) {d <- 125}; if (i ==15) {d <- 130}
-	if (i == 16) {d <- 130}; if (i == 17) {d <- 130}; if (i == 18) {d <- 120}; if (i == 19) {d <- 108}; if (i ==20) {d <- 108}
+	## baboon chromsome lengths
+	d <- c(172,115,100,164,113,111,116,93,88,88,91,126,77,76,69,89,77,84,63,63) [i]
 	
 	r1$cM <- r1$sum*d/max(r1$sum)
 	lo <- loess(r1$cM ~ r1$end, span = 0.01)
 	tmp$GP <- predict(lo, tmp$PP)
-	tmp$GP[tmp$PP < 250000] <- predict(lo,250000)*tmp$PP[tmp$PP < 250000]/ 250000
+	tmp$GP[tmp$PP < 75000] <- predict(lo,75000)*tmp$PP[tmp$PP < 75000]/ 75000
+	tmp <- tmp[!is.na(tmp$GP),]
 	rbind(s3,tmp) -> s3
 }
 #s2$GP <- s2$PP/1e6
 write.table(s3, "ambo.v2.snp", row.names=F, col.names=F, sep="\t", quote=F)
 
 
-library(data.table); fread("n33.snp") -> snp
-#dim(snp); subset(snp, snp$V4 >= min(rcr$`#`) & snp$V4 <= max(rcr$left_snp)) -> snp ; dim(snp) #clear out SNPs beyond RCR rate
+library(data.table); fread("n46.snp") -> snp
 s2 <- as.data.frame(cbind(paste("snp", snp$V4,sep=""), snp$V2))
 colnames(s2)[1:2] <- c("snpid","chr")
 s2$GP <- NA
 s2$PP <- snp$V4
-load("~/n10_recombination_rates.RData")
-subset(res, res$n24_anubis < 100*median(res$n24_anubis)) -> res2
+load("/data/tunglab/tpv/Windows_25kb_recombination.RData")
+subset(rcr, rcr$n24_anubis < 100*median(rcr$n24_anubis)) -> res2
 s3 <- NULL 
 for (i in unique(snp$V2)) {
 	tmp=subset(s2, s2$chr == i) 
 	r1=subset(res2, res2$chr == paste("chr",i,sep=""))
 	r1$sum <- cumsum(r1$n24_anubis)
 	
-	if (i == 1) {d <- 280}; if (i == 2) {d <- 264}; if (i == 3) {d <- 220}; if (i == 4) {d <- 210}; if (i ==5) {d <- 200}
-	if (i == 6) {d <- 190}; if (i == 7) {d <- 185}; if (i == 8) {d <- 170}; if (i == 9) {d <- 165}; if (i ==10) {d <- 175}
-	if (i == 11) {d <- 160}; if (i == 12) {d <- 175}; if (i == 13) {d <- 130}; if (i == 14) {d <- 125}; if (i ==15) {d <- 130}
-	if (i == 16) {d <- 130}; if (i == 17) {d <- 130}; if (i == 18) {d <- 120}; if (i == 19) {d <- 108}; if (i ==20) {d <- 108}
+	d <- c(172,115,100,164,113,111,116,93,88,88,91,126,77,76,69,89,77,84,63,63) [i]
 	
 	r1$cM <- r1$sum*d/max(r1$sum)
 	lo <- loess(r1$cM ~ r1$end, span = 0.01)
 	tmp$GP <- predict(lo, tmp$PP)
-	tmp$GP[tmp$PP < 250000] <- predict(lo,250000)*tmp$PP[tmp$PP < 250000]/ 250000
-	#tmp$GP[tmp$PP > max(r1$end)] <- predict(lo,250000)*tmp$PP[tmp$PP < 250000] d/250000
-	## Just did a little repair instead for chrom 8 where this failed: subset out that chromosome, took the mean rate across sites (pbp), assigned for  the sites with NAs (s$V3[is.na(s$V3)] <- pbp*s$V4[is.na(s$V3)]), then insert back into the full matrix (snp$V3[snp$V2 == 8] <- s$V3). save output again 
-	print("binding")
+	tmp$GP[tmp$PP < 75000] <- predict(lo,75000)*tmp$PP[tmp$PP < 75000]/ 75000
+	tmp <- tmp[!is.na(tmp$GP),]
 	rbind(s3,tmp) -> s3
 	print(i)
 }
 #s2$GP <- s2$PP/1e6
-write.table(s3, "n33.v2.snp", row.names=F, col.names=F, sep="\t", quote=F)
+write.table(s3, "n46.v2.snp", row.names=F, col.names=F, sep="\t", quote=F)
 
 
 ## Merge ANCESTRYMAP files 
