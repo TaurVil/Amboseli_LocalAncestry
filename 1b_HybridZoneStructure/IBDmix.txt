@@ -1,0 +1,39 @@
+## Use IBDmix (Chen et al. 2020) to test for shared ancestry without assuming any individuals are unadmixed
+
+# IBDmix
+
+# Local installation of up to date cmake 
+./configure  --prefix=/data/tunglab/tpv/Programs/cmake/
+gmake; gmake install 
+
+export PATH=$PATH:/data/tunglab/tpv/Programs/cmake/bin/
+
+## needed to run cmake, then make once within the src directory
+/data/tunglab/tpv/Programs/IBDmix/IBDmix-master/build/src/
+
+### merge genotypes using generate_gt
+
+# Test and source populations
+## Only high coverage samples
+## Removed pcyn_16098 which is the same individual as MIK_007
+cat 00_anu.list /data/tunglab/tpv/panubis1_genotypes/00_otherspecies.list > 00_yellow_sources.list
+cat 00_yel.list /data/tunglab/tpv/panubis1_genotypes/00_otherspecies.list > 00_anubis_sources.list
+
+sbatch --array=1-20 --mem=16G run_IBDmix.sh
+
+
+
+
+
+
+## Do IBDmix of Amboseli individuals as well. 
+
+cd /data/tunglab/tpv/local_ancestry; mkdir Amboseli_ibdmix; cd Amboseli_ibdmix
+cat /data/tunglab/tpv/unadmixed_individuals/00_anu.list /data/tunglab/tpv/unadmixed_individuals/00_yel.list  /data/tunglab/tpv/panubis1_genotypes/00_otherspecies.list > 00_amboseli_sources.txt
+
+## write 00_amboseli.list manually to contain our 9 high coverage individuals. 
+## Get Amboseli genotypes from: /data/tunglab/tpv/panubis1_genotypes/calls_merged/04.merged_shared.$chrom.vcf.gz
+## Get source genotypes from: /data/tunglab/tpv/panubis1_genotypes/high_coverage/02.unadmixed_highcov.$chrom.recode.vcf.gz
+
+mkdir ./chrom_vcfs/ ; mkdir IBDmix_by_chrom ## chrom vcfs contains intermediaries while IBDmix_by_chrom contains the real output
+sbatch --array=1-20 --mem=16G run_IBDmix.sh
