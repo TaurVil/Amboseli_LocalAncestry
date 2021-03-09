@@ -1,11 +1,6 @@
 ## Get recombination maps for the panubis1 genome
-# We'll be making 4 maps:
-#        -anubis map (n=24 SW anubis)
-#        -yellow map (n=XX high-cov yellow)
-#        -SW yellow map
-#        -Mikumi yellow map
-#        -Downsampled anubis maps (to match partial yellow maps)
-# Uses genotype calls for anubis and yellow individuals from /Amboseli_LocalAncestry/Resouces/Genotype_Calls
+# We'll be making an anubis map using the SW founder baboons (n=24 SW anubis)
+# Uses genotype calls for anubis individuals from /Amboseli_LocalAncestry/Resouces/Genotype_Calls
 
 cd /data/tunglab/tpv/panubis1_genotypes/recombination
 
