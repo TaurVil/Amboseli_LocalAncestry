@@ -36,9 +36,9 @@ mv i*.txt tracts/; mv slurm-* tracts/
 zcat /data/tunglab/tpv/panubis1_genotypes/calls_unadmixed/02.yel.20.recode.vcf.gz | grep '^#' | tail -1 > vcf_example_header
 # manually edit to create 1 name only ("SAMPLE")
 
-# get yellow and anubis allele frequencies
-module load vcftools; cd /data/tunglab/tpv/panubis1_genotypes/calls_unadmixed; for f in `seq 17 20`; do vcftools --gzvcf 02.yel.$f.recode.vcf.gz --freq --out chr$f.yellow; sed -i '1d' chr$f.yellow.frq; sed -i 's/:/\t/g' chr$f.yellow.frq; vcftools --gzvcf 02.anu.$f.recode.vcf.gz --freq --out chr$f.anubis; sed -i '1d' chr$f.anubis.frq; sed -i 's/:/\t/g' chr$f.anubis.frq; done
-mv chr*frq /data/tunglab/tpv/local_ancestry/simulated_data/; cd /data/tunglab/tpv/local_ancestry/simulated_data/; 
+# get yellow and anubis allele frequencies: this time only from the SW panel
+module load vcftools; cd /data/tunglab/tpv/panubis1_genotypes/calls_unadmixed; for f in `seq 17 20`; do vcftools --gzvcf 02.yel.$f.recode.vcf.gz --keep ../00_yel_SW.list --freq --out chr$f.yellow; sed -i '1d' chr$f.yellow.frq; sed -i 's/:/\t/g' chr$f.yellow.frq; vcftools --gzvcf 02.anu.$f.recode.vcf.gz --keep ../00_anu_SW.list --freq --out chr$f.anubis; sed -i '1d' chr$f.anubis.frq; sed -i 's/:/\t/g' chr$f.anubis.frq; done
+mkdir /data/tunglab/tpv/local_ancestry/sim_v2/a_priori_frequencies/; mv chr*frq /data/tunglab/tpv/local_ancestry/sim_v2/a_priori_frequencies/; cd /data/tunglab/tpv/local_ancestry/sim_v2/; 
 
 # get a simplified vcf file for each sample
 mkdir simulated_vcfs; module load R; for f in `cat 00names`; do for g in `cat 00chroms`; do cat run.get_sample_vcf.R | sed -e s/NAME/$f/g | sed -e s/SCAF/$g/g > g.$f.$g.R; sbatch g.$f.$g.R; rm g.$f.$g.R; done; done 
@@ -48,14 +48,15 @@ rm slurm*
 zcat /data/tunglab/tpv/panubis1_genotypes/calls_merged/04.merged_shared.1.vcf.gz | grep '^#' | sed '$ d' > full_header.vcf
 
 # Get small genomes to generate reads for
-module load samtools; for f in `cat 00chroms`; do samtools faidx /data/tunglab/shared/genomes/panubis1/Panubis1.0.fa $f > $f.fa; echo $f; done; cat chr*.fa > Reduced_Genome.fa
+mkdir partial_genome
+module load samtools; for f in `cat 00chroms`; do samtools faidx /data/tunglab/shared/genomes/panubis1/Panubis1.0.fa $f > ./partial_genome/$f.fa; echo $f; done; cat ./partial_genome/chr*.fa > ./partial_genome/Reduced_Genome.fa
 
 ##Simulate reads using NEAT-genreads, a tool developed by Zachary Stephens 
 #github: https://github.com/zstephens/neat-genreads
 #publication: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5125660/
 # Generate 10x coverage in SE, 100bp reads
-mkdir sim_reads
-for f in `cat 00names`; do for g in `cat 00chroms`; do sed s/INDIV/$f/g run.get_fasta.sh | sed s/CHROMO/$g/g > g.$f.sh; sbatch g.$f.sh; rm g.$f.sh; done; done
+mkdir sim_reads; for f in `cat 00names`; do for g in `cat 00chroms`; do sed s/INDIV/$f/g run.get_fasta.sh | sed s/CHROMO/$g/g > g.$f.sh; sbatch g.$f.sh; rm g.$f.sh; done; done
+mv tracts/ true_tracts/
 
 ## Combine chromosomes, and map reads using bowtie2
 ## Make reduced bowtie2 index to map to
